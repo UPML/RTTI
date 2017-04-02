@@ -5,5 +5,5 @@ set(CMAKE_CXX_STANDARD 11)
 
 set (CMAKE_CXX_FLAGS "-fno-rtti")
 
-set(SOURCE_FILES main.cpp)
+set(SOURCE_FILES main.cpp TypeInfo.h)
 add_executable(RTTI ${SOURCE_FILES})

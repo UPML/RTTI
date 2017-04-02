@@ -1,88 +1,36 @@
 #include <iostream>
-#include <cstdio>
-#include <stdlib.h>
-#include <map>
-
-struct TypeInfo{
-    TypeInfo(std::string _name) {
-        name = _name;
-    }
-    bool operator==(const TypeInfo& other) const{
-        return name == other.name;
-    }
-    bool operator!=(const TypeInfo& other) const{
-        return name != other.name;
-    }
-    std::string name;
-    int GetHash(){
-        return std::hash<std::string>()(name);
-    }
-
-};
-
-static std::map<std::string, TypeInfo> TypeInfoForClasses;
-
-template <typename T>
-struct MetaTypeInfo
-{
-    static TypeInfo getTypeInfo()
-    {
-        return T::TYPE_NOT_REGISTERED__USE_RTTR_DECLARE_META_TYPE();
-    }
-};
-
-TypeInfo registerOrGetType(const char* _name){
-    std::string name = std::string(_name);
-    return TypeInfo(name);
-}
-
-#define RTTR_DECLARE_META_TYPE(T)                       \
-template<>                                              \
-struct MetaTypeInfo< T >                                \
-{                                                       \
-  static TypeInfo getTypeInfo()                   \
-  {                                                     \
-       static const TypeInfo val = registerOrGetType(#T);  \
-       return val;      \
-  }                                                     \
-};
-
-
-RTTR_DECLARE_META_TYPE(int)
-RTTR_DECLARE_META_TYPE(bool)
-
-template<typename T>
-static TypeInfo getTypeInfoFromInstance(const T*)
-{
-    return MetaTypeInfo<T>::getTypeInfo();
-}
-
+#include "TypeInfo.h"
 
 struct Base
 {
-    virtual TypeInfo getTypeInfo() const
-    {
-        return getTypeInfoFromInstance(this);
-    }
+    int k;
 };
-RTTR_DECLARE_META_TYPE(Base)
 
 struct DerivedA : Base
 {
-    virtual TypeInfo getTypeInfo() const
-    {
-        return getTypeInfoFromInstance(this);
-    }
+    char c;
 };
-RTTR_DECLARE_META_TYPE(DerivedA)
+
+struct DerivedB : Base
+{
+    int a;
+    int b;
+};
+
+
+struct Derived : DerivedA, DerivedB
+{
+    int a;
+    int b;
+};
 
 int main() {
-    int *k;
-    bool *b;
-    std::cout << getTypeInfoFromInstance(k).name << "\n";
-    std::cout << getTypeInfoFromInstance(k).GetHash() << "\n";
-    std::cout << std::to_string( getTypeInfoFromInstance(k) == getTypeInfoFromInstance(b) ) << "\n";
-    DerivedA* A;
-    std::cout << getTypeInfoFromInstance(A).name << "\n";
+    Base *a = NEW(DerivedA, a);
+    Base *b = NEW(Base, b);
+    std::cout << TYPEID(a).name << "\n";
+    std::cout << TYPEID(b).name << "\n";
+    std::cout << "Base size = " << sizeof(Base) << " derivedA size = " << sizeof(DerivedA) << "\n";
+    std::cout << "DerivedB size = " << sizeof(DerivedB) << " derived size = " << sizeof(Derived) << "\n";
+
     return 0;
 }
