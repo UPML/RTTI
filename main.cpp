@@ -57,11 +57,32 @@ static TypeInfo getTypeInfoFromInstance(const T*)
     return MetaTypeInfo<T>::getTypeInfo();
 }
 
+
+struct Base
+{
+    virtual TypeInfo getTypeInfo() const
+    {
+        return getTypeInfoFromInstance(this);
+    }
+};
+RTTR_DECLARE_META_TYPE(Base)
+
+struct DerivedA : Base
+{
+    virtual TypeInfo getTypeInfo() const
+    {
+        return getTypeInfoFromInstance(this);
+    }
+};
+RTTR_DECLARE_META_TYPE(DerivedA)
+
 int main() {
     int *k;
     bool *b;
     std::cout << getTypeInfoFromInstance(k).name << "\n";
     std::cout << getTypeInfoFromInstance(k).GetHash() << "\n";
     std::cout << std::to_string( getTypeInfoFromInstance(k) == getTypeInfoFromInstance(b) ) << "\n";
+    DerivedA* A;
+    std::cout << getTypeInfoFromInstance(A).name << "\n";
     return 0;
 }
