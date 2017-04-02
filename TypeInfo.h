@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <map>
 #include <vector>
+#include <set>
+#include <assert.h>
 
 
 struct TypeInfo{
@@ -28,20 +30,20 @@ struct TypeInfo{
 };
 
 static std::map<std::string, TypeInfo> TypeInfoForClasses;
-static std::map<std::string, std::vector<std::string> > graph;
+static std::map<std::string, std::set<std::string> > graph;
 
 struct registrar{
     registrar(std::string derived, std::string base){
-        if(graph.find(base) == graph.end()){
-            graph[base] = std::vector<std::string>();
+        if(graph.find(derived) == graph.end()){
+            graph[derived] = std::set<std::string>();
         }
-        graph[base].push_back(derived);
-        for(auto i = graph.begin(); i != graph.end(); ++i){
-            for( int j = 0; j < i->second.size(); ++j){
-                if(i->second[j] == base){
-                    graph[i->first].push_back(derived);
-                }
-            }
+        if(graph.find(base) == graph.end()){
+            graph[base] = std::set<std::string>();
+            graph[base].insert(base);
+        }
+        graph[derived].insert(derived);
+        for( auto i = graph[base].begin(); i != graph[base].end(); ++i ){
+            graph[derived].insert(*i);
         }
     }
 };
@@ -58,6 +60,10 @@ registrar r = registrar(#D, #B);
 #define MEXTENDS(D, B1, B2) D : B1, B2 { \
 registrar r1 = registrar(#D, #B1); \
 registrar r2 = registrar(#D, #B2);
+
+#define DYNAMIC_CAST(T, a) (assert( graph.find(TYPEID(a).name) != graph.end() ),  \
+assert( graph[TYPEID(a).name].find(#T) != graph[TYPEID(a).name].end() ),\
+reinterpret_cast<T*>(a) )
 
 
 #endif //RTTI_TYPEINFO_H

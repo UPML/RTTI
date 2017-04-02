@@ -33,11 +33,15 @@ int main() {
         }
     }
     std::cout << reinterpret_cast<Derived *>(d)->c << "\n";
-    //std::cout << dynamic_cast<Derived*>(d)->c << "\n";
+    std::cout << TYPEID(d).name;
+    std::cout << DYNAMIC_CAST(Derived, d)->c << "\n";
     std::cout << TYPEID(a).name << "\n";
     std::cout << TYPEID(b).name << "\n";
     std::cout << "Base size = " << sizeof(Base) << " derivedA size = " << sizeof(DerivedA) << "\n";
     std::cout << "DerivedB size = " << sizeof(DerivedB) << " derived size = " << sizeof(Derived) << "\n";
-    std::cout << reinterpret_cast<DerivedA*>(a)->c;
+    std::cout << reinterpret_cast<DerivedA*>(a)->c << "\n";
+    for( auto i = graph["Derived"].begin(); i != graph["Derived"].end(); ++i ){
+        std::cout << *i << "\n";
+    }
     return 0;
 }
