@@ -10,6 +10,8 @@ struct Base
 struct EXTENDS(DerivedA, Base)
     virtual void f(){}
     int c = 10;
+    int d = 20;
+    int e = 20;
 };
 
 struct EXTENDS(DerivedB, Base)
@@ -26,15 +28,15 @@ struct MEXTENDS(Derived, DerivedA, DerivedB)
 int main() {
     Base *a = NEW(DerivedA, a);
     Base *b = NEW(Base, b);
-    DerivedA *d = NEW(Derived, d);
+    DerivedB *d = NEW(Derived, d);
     for( int i = -100; i < 100; ++i) {
         if (reinterpret_cast<Derived *>(d + i)->c == 10) {
             std::cout << i << " " << reinterpret_cast<Derived *>(d + i)->c << "\n";
         }
     }
     std::cout << reinterpret_cast<Derived *>(d)->c << "\n";
-    std::cout << TYPEID(d).name;
     std::cout << DYNAMIC_CAST(Derived, d)->c << "\n";
+    std::cout << TYPEID(d).name;
     std::cout << TYPEID(a).name << "\n";
     std::cout << TYPEID(b).name << "\n";
     std::cout << "Base size = " << sizeof(Base) << " derivedA size = " << sizeof(DerivedA) << "\n";
