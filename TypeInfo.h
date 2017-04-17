@@ -29,41 +29,49 @@ struct TypeInfo{
     }
 };
 
+
+const bool operator <(const std::pair<std::string, int> &a, const std::pair<std::string, int>& b) {
+    if( a.first != b.first){
+        return  a.first < b.first;
+    }
+    return a.second < b.second;
+}
+
 static std::map<std::string, TypeInfo> TypeInfoForClasses;
-static std::map<std::string, std::set<std::string> > graph;
+static std::map<std::string, std::map< std::string, int > > graph;
 
 struct registrar{
-    registrar(std::string derived, std::string base){
+    registrar(std::string derived, std::string base, int offset ){
         if(graph.find(derived) == graph.end()){
-            graph[derived] = std::set<std::string>();
+            graph[derived] = std::map< std::string, int >();
         }
         if(graph.find(base) == graph.end()){
-            graph[base] = std::set<std::string>();
-            graph[base].insert(base);
+            graph[base] = std::map< std::string, int >();
+            graph[base][base] = 0;
         }
-        graph[derived].insert(derived);
+        graph[derived][derived] = 0;
         for( auto i = graph[base].begin(); i != graph[base].end(); ++i ){
-            graph[derived].insert(*i);
+            graph[derived][i->first] = -offset;
         }
     }
 };
 
-#define NEW(T, o) new T();                             \
+#define NEW(B, T, o) new T();                             \
 TypeInfoForClasses[std::string(#o)] = TypeInfo(#T);
 
 
 #define TYPEID(o) TypeInfoForClasses[std::string(#o)]
 
 #define EXTENDS(D, B) D : B { \
-registrar r = registrar(#D, #B);
+registrar r = registrar(#D, #B, 0);
 
 #define MEXTENDS(D, B1, B2) D : B1, B2 { \
-registrar r1 = registrar(#D, #B1); \
-registrar r2 = registrar(#D, #B2);
+registrar r1 = registrar(#D, #B1, 0); \
+registrar r2 = registrar(#D, #B2, sizeof(B1) );
 
-#define DYNAMIC_CAST(T, a) (assert( graph.find(TYPEID(a).name) != graph.end() ),  \
+#define DYNAMIC_CAST(R, T, a) (assert( graph.find(TYPEID(a).name) != graph.end() ),  \
 assert( graph[TYPEID(a).name].find(#T) != graph[TYPEID(a).name].end() ),\
-reinterpret_cast<T*>(a) )
+static_cast<T*>( static_cast< R *>(a)))//(char*)(a) + graph[TYPEID(a).name][#R]))
 
 
 #endif //RTTI_TYPEINFO_H
